@@ -3,6 +3,7 @@ require_once 'config.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,9 @@ require_once 'config.php';
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <!-- Shared Design System -->
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
@@ -108,8 +111,15 @@ require_once 'config.php';
             letter-spacing: 0.05em;
         }
 
-        .badge-intent { background: rgba(139, 92, 246, 0.1); color: var(--accent-primary); }
-        .badge-collect { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+        .badge-intent {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .badge-collect {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
 
         .footer {
             margin-top: 4rem;
@@ -141,12 +151,24 @@ require_once 'config.php';
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -159,26 +181,14 @@ require_once 'config.php';
         </header>
 
         <div class="grid">
-            <!-- UPI INTENT FLOW -->
             <a href="generate_upi_link.php" class="dashboard-card">
-                <span class="badge badge-intent">Recommended</span>
                 <div class="card-icon">🔗</div>
                 <div class="card-title">UPI Intent / QR</div>
                 <div class="card-description">
-                    Generate scannable QR codes and deep links for mobile apps. Best for direct bank transfers and merchant payments.
+                    Generate scannable QR codes and deep links for mobile apps. Best for direct bank transfers and
+                    merchant payments.
                 </div>
                 <div class="card-action">Launch Intent Flow →</div>
-            </a>
-
-            <!-- UPI COLLECT FLOW -->
-            <a href="create_collect_request.php" class="dashboard-card">
-                <span class="badge badge-collect">Direct Push</span>
-                <div class="card-icon">📲</div>
-                <div class="card-title">UPI Collect</div>
-                <div class="card-description">
-                    Send a push notification directly to the customer's UPI app. They just need to enter their PIN to approve.
-                </div>
-                <div class="card-action">Launch Collect Flow →</div>
             </a>
         </div>
 
@@ -192,4 +202,5 @@ require_once 'config.php';
         </div>
     </div>
 </body>
+
 </html>

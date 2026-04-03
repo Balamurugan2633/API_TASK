@@ -8,14 +8,10 @@ $response_data = call_zwitch($endpoint, 'GET');
 
 $vpa = $response_data['body']['vpa'] ?? null;
 $name = $response_data['body']['name'] ?? 'Virtual Account';
+$show_qr = false;
 
-if ($vpa) {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $amount = $_POST['amount'] ?? '1.00';
-    } else {
-        $amount = '1.00';
-    }
-    
+if ($vpa && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $amount = $_POST['amount'] ?? '1.00';
     $remark = "Scale Wallet Load";
     
     // Construct the standard UPI URI
@@ -24,16 +20,7 @@ if ($vpa) {
     // Create a QR code URL using a reliable public API (QRServer)
     $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($upi_uri);
     
-    // Overwrite the response_data for the UI to handle it correctly
-    $response_data['body'] = [
-        'data' => [
-            'vpa' => $vpa,
-            'name' => $name,
-            'amount' => $amount,
-            'upi_uri' => $upi_uri,
-            'qr_url' => $qr_url
-        ]
-    ];
+    $show_qr = true;
 }
 ?>
 <!DOCTYPE html>
@@ -70,10 +57,10 @@ if ($vpa) {
                     <input type="number" step="0.01" name="amount" id="amount" value="<?php echo htmlspecialchars($amount ?? '100'); ?>" required min="1">
                 </div>
             </div>
-            <button type="submit" class="btn">Update Payment QR</button>
+            <button type="submit" class="btn"><?php echo $show_qr ? 'Update Payment QR' : 'Generate Payment QR'; ?></button>
         </form>
 
-        <?php if ($vpa): ?>
+        <?php if ($show_qr): ?>
             <div class="result-card">
                 <div class="status-badge">READY TO SCAN</div>
                 
@@ -99,7 +86,7 @@ if ($vpa) {
                 <a href="<?php echo $upi_uri; ?>" class="pay-btn">Open in UPI App</a>
                 <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 1rem;">Scanning on mobile recommended for best experience</p>
             </div>
-        <?php elseif ($response_data): ?>
+        <?php elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $response_data): ?>
             <div class="result-card">
                 <div class="status-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">ERROR</div>
                 <div class="payment-info" style="color: #ef4444; font-size: 0.875rem;">
