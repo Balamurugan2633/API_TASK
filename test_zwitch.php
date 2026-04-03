@@ -7,7 +7,8 @@ $api_secret = '948005f9fdc951237b752b18912e6a2eef875bf2';
 
 $auth = "Bearer $access_key:$api_secret";
 
-function call_zwitch($url, $method = 'GET', $data = null) {
+function call_zwitch($url, $method = 'GET', $data = null)
+{
     global $auth;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -23,7 +24,6 @@ function call_zwitch($url, $method = 'GET', $data = null) {
     }
     $res = curl_exec($ch);
     $info = curl_getinfo($ch);
-    curl_close($ch);
     return ['code' => $info['http_code'], 'body' => $res];
 }
 

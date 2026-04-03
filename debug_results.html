@@ -1,0 +1,18 @@
+<h1>Zwitch Authentication Debugger</h1>
+<p>Testing different authentication patterns for your keys.</p>
+<h3>Testing: Production (Bearer)</h3>URL: https://api.zwitch.io/v1/accounts<br><strong>HTTP Status:
+    401</strong><br>Trace ID: <code style='background:#eee;padding:2px;'>N/A</code><br>Response:
+<pre>{&quot;error&quot;:{&quot;type&quot;:&quot;authentication_error&quot;,&quot;message&quot;:&quot;Invalid access/secret key.&quot;}}</pre>
+<hr>
+<h3>Testing: Production (Basic)</h3>URL: https://api.zwitch.io/v1/accounts<br><strong>HTTP Status: 401</strong><br>Trace
+ID: <code style='background:#eee;padding:2px;'>N/A</code><br>Response:
+<pre>{&quot;error&quot;:{&quot;type&quot;:&quot;authentication_error&quot;,&quot;message&quot;:&quot;Invalid access/secret key.&quot;}}</pre>
+<hr>
+<h3>Testing: Sandbox (Bearer)</h3>URL: https://sandbox.zwitch.io/v1/accounts<br><strong>HTTP Status: 0</strong><br>Trace
+ID: <code style='background:#eee;padding:2px;'>N/A</code><br>Response:
+<pre></pre>
+<hr>
+<h3>Testing: Sandbox (Basic)</h3>URL: https://sandbox.zwitch.io/v1/accounts<br><strong>HTTP Status: 0</strong><br>Trace
+ID: <code style='background:#eee;padding:2px;'>N/A</code><br>Response:
+<pre></pre>
+<hr>

@@ -1,65 +1,117 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once 'config.php';
 
-// Credentials from PG API Keys
-$access_key = '66dcc080-2dd1-11f1-bd4b-479331323d05';
-$api_secret = 'fed7e32182199db3910cdbb22d53df6c4fedf3bc';
-$account_id = 'va_VjZoGFRRfwp2tG5O4KqM7H2cT'; 
+// Fetch Virtual Account details to get the VPA (UPI ID)
+// This is the correct and most reliable way to "Load" a VA via UPI.
+$endpoint = "/v1/accounts/" . ZWITCH_ACCOUNT_ID;
+$response_data = call_zwitch($endpoint, 'GET');
 
-$auth = "Bearer $access_key:$api_secret";
+$vpa = $response_data['body']['vpa'] ?? null;
+$name = $response_data['body']['name'] ?? 'Virtual Account';
 
-function call_zwitch($url, $method = 'POST', $data = null) {
-    global $auth;
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: $auth",
-        "Content-Type: application/json",
-        "Accept: application/json"
-    ]);
-    if ($data) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    }
-    $res = curl_exec($ch);
-    $info = curl_getinfo($ch);
-    curl_close($ch);
-    return ['code' => $info['http_code'], 'body' => json_decode($res, true)];
-}
-
-echo "<h1>Zwitch Payment Link Generator</h1>";
-
-// Create UPI Intent Link (Directly using ICP Endpoint)
-echo "<h3>Generating UPI Intent Link...</h3>";
-$intent_data = [
-    "amount" => "1.00", 
-    "currency" => "INR",
-    "contact_number" => "9999999999",
-    "email_id" => "test@example.com",
-    "mtx" => "TXN_" . time()
-];
-
-$intent_res = call_zwitch("https://api.zwitch.io/icp/upi/intent", 'POST', $intent_data);
-
-if ($intent_res['code'] == 200 || $intent_res['code'] == 201) {
-    $link = $intent_res['body']['link'] ?? $intent_res['body']['intent_string'] ?? null;
-    if ($link) {
-        echo "<div style='padding: 20px; background: #e7f3ff; border: 1px solid #b3d7ff; border-radius: 5px;'>";
-        echo "<strong>Test Payment Link Generated!</strong><br><br>";
-        echo "<a href='$link' target='_blank' style='display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;'>Open in UPI App</a><br><br>";
-        echo "Copy Link: <input type='text' value='$link' readonly style='width: 100%; padding: 5px;'>";
-        echo "</div>";
+if ($vpa) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $amount = $_POST['amount'] ?? '1.00';
     } else {
-        echo "Error: Link not found in response. <pre>" . print_r($intent_res['body'], true) . "</pre>";
+        $amount = '1.00';
     }
-} else {
-    echo "Error creating UPI intent: " . $intent_res['code'] . "<br>";
-    echo "<pre>" . print_r($intent_res['body'], true) . "</pre>";
     
-    if ($intent_res['code'] == 400 && strpos(json_encode($intent_res['body']), 'merchant details') !== false) {
-        echo "<p style='color: red;'><strong>Troubleshooting Tip:</strong> This error (400) usually means your Zwitch KYC is still pending or not fully activated for Payment Gateway features. Please check your Dashboard.</p>";
-    }
+    $remark = "Scale Wallet Load";
+    
+    // Construct the standard UPI URI
+    $upi_uri = "upi://pay?pa=" . $vpa . "&pn=" . urlencode($name) . "&am=" . $amount . "&cu=INR&tn=" . urlencode($remark);
+    
+    // Create a QR code URL using a reliable public API (QRServer)
+    $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($upi_uri);
+    
+    // Overwrite the response_data for the UI to handle it correctly
+    $response_data['body'] = [
+        'data' => [
+            'vpa' => $vpa,
+            'name' => $name,
+            'amount' => $amount,
+            'upi_uri' => $upi_uri,
+            'qr_url' => $qr_url
+        ]
+    ];
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Intent Flow | Zwitch Pay</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Shared Design System -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .vpa-highlight { color: #38bdf8; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">⚡ ZWITCH PAY</div>
+            <h1>UPI Intent / QR</h1>
+            <p class="subtitle">Quickly load funds into your virtual account. Perfect for scan-to-pay checkouts.</p>
+        </header>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="amount">Deposit Amount</label>
+                <div class="input-wrapper">
+                    <input type="number" step="0.01" name="amount" id="amount" value="<?php echo htmlspecialchars($amount ?? '100'); ?>" required min="1">
+                </div>
+            </div>
+            <button type="submit" class="btn">Update Payment QR</button>
+        </form>
+
+        <?php if ($vpa): ?>
+            <div class="result-card">
+                <div class="status-badge">READY TO SCAN</div>
+                
+                <div class="qr-container">
+                    <img src="<?php echo $qr_url; ?>" alt="UPI QR Code">
+                </div>
+
+                <div class="payment-info">
+                    <div class="info-row">
+                        <div class="info-label">Receiver Account</div>
+                        <div class="info-value"><?php echo htmlspecialchars($name); ?></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Receiver UPI ID</div>
+                        <div class="info-value vpa-highlight"><?php echo $vpa; ?></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Amount to Load</div>
+                        <div class="info-value">₹<?php echo number_format($amount, 2); ?></div>
+                    </div>
+                </div>
+
+                <a href="<?php echo $upi_uri; ?>" class="pay-btn">Open in UPI App</a>
+                <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 1rem;">Scanning on mobile recommended for best experience</p>
+            </div>
+        <?php elseif ($response_data): ?>
+            <div class="result-card">
+                <div class="status-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">ERROR</div>
+                <div class="payment-info" style="color: #ef4444; font-size: 0.875rem;">
+                    <strong>Failed to initialize Virtual Account connection.</strong><br><br>
+                    <?php echo htmlspecialchars(print_r($response_data['body'], true)); ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <div class="footer-link">
+            <a href="index.php">← Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

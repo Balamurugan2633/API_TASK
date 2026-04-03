@@ -4,7 +4,7 @@ import time
 
 access_key = 'ak_test_cM7M7FHfXQhABa8l8Ry20xayfnyUcO7zta4N'
 api_secret = '948005f9fdc951237b752b18912e6a2eef875bf2'
-account_id = 'va_VjZoGFRRfwp2tG5O4KqM7H2cT'
+account_id = 'va_PuzB10ZIUkYX0hK6Uz8q8C41j'
 
 url = f"https://api.zwitch.io/v1/accounts/{account_id}/payments/upi/collect"
 auth = f"Bearer {access_key}:{api_secret}"

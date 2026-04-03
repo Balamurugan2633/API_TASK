@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // User's Credentials from Image
-$access_key = 'ak_test_cM7M7FHfXQHBa8l8Ry20xayfnyUc07zta4N';
+$access_key = 'ak_test_cM7M7FHfXQhABa8l8Ry20xayfnyUcO7zta4N';
 $api_secret = '948005f9fdc951237b752b18912e6a2eef875bf2';
 $api_key_uuid = 'ab794780-03ef-11f1-ba5d-cb6d34960307';
 
@@ -26,11 +26,10 @@ foreach ($auth_methods as $label => $header) {
         "Content-Type: application/json",
         "Accept: application/json"
     ]);
-    
+
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
+
     echo "HTTP Status: $http_code\n";
     echo "Response: " . substr($response, 0, 200) . "...\n\n";
 }
