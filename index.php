@@ -181,7 +181,7 @@ require_once 'config.php';
         </header>
 
         <div class="grid">
-            <a href="generate_upi_link.html" class="dashboard-card">
+            <a href="generate_upi_link.php" class="dashboard-card">
                 <div class="card-icon">🔗</div>
                 <div class="card-title">UPI Intent / QR</div>
                 <div class="card-description">
